@@ -1,0 +1,63 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: var(--brown-dark);
+  color: var(--cream);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+}
+
+.brand-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.header-nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.header-nav button {
+  background: transparent;
+  color: var(--parchment);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.header-nav button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header-nav .nav-active {
+  background: var(--green-accent);
+  color: white;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.demo-badge {
+  font-size: 0.75rem;
+  background: var(--gold);
+  color: var(--brown-dark);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
