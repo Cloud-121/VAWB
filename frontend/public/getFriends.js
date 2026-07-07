@@ -66,14 +66,32 @@
     return null;
   }
 
-  async function apiFetch(url, token) {
-    const res = await fetch(url, { headers: { Authorization: token } });
-    const data = await res.json();
-    if (!res.ok) {
-      const msg = data?.message || res.statusText;
-      throw new Error(`${res.status} ${msg}`);
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  // ~10s per friend, randomized to reduce rate limits (8–14 seconds)
+  const DELAY_MIN_MS = 8000;
+  const DELAY_MAX_MS = 14000;
+  const randomDelay = () => DELAY_MIN_MS + Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS);
+
+  async function apiFetch(url, token, retries = 3) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const res = await fetch(url, { headers: { Authorization: token } });
+      const data = await res.json();
+
+      if (res.status === 429 && attempt < retries) {
+        const retryMs = ((data?.retry_after ?? 10) + Math.random() * 2) * 1000;
+        console.warn(`⏳ Rate limited — waiting ${(retryMs / 1000).toFixed(1)}s...`);
+        await wait(retryMs);
+        continue;
+      }
+
+      if (!res.ok) {
+        const msg = data?.message || res.statusText;
+        throw new Error(`${res.status} ${msg}`);
+      }
+      return data;
     }
-    return data;
+    throw new Error('429 Too Many Requests');
   }
 
   async function fetchFriends(token) {
@@ -83,8 +101,6 @@
       .filter((r) => r && r.type === 1 && r.user)
       .map((r) => r.user);
   }
-
-  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   async function fetchMutualIds(friendId, token) {
     // Discord blocked /users/{id}/relationships for other users — use profile instead
@@ -122,10 +138,12 @@
 
   async function buildFriendData(friends, token) {
     const output = {};
-    const mins = Math.floor((friends.length % 3600) / 60);
-    const secs = friends.length % 60;
+    const avgDelaySec = (DELAY_MIN_MS + DELAY_MAX_MS) / 2 / 1000;
+    const totalSec = Math.round(friends.length * avgDelaySec);
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
     const eta = `${mins > 0 ? `${mins} minute${mins === 1 ? '' : 's'} and ` : ''}${secs > 0 ? `${secs} second${secs === 1 ? '' : 's'}` : ''}`;
-    console.log(`⏱ This will take about ${eta || 'a moment'}`);
+    console.log(`⏱ ~${avgDelaySec}s between each friend (randomized). Estimated time: ${eta || 'a moment'}`);
 
     for (let i = 0; i < friends.length; i++) {
       const user = friends[i];
@@ -146,7 +164,11 @@
         mutual,
       };
       console.log(`📃 Parsing friends... [${i + 1}/${friends.length}] (${mutual.length} mutual)`);
-      await wait(400);
+      if (i < friends.length - 1) {
+        const delay = randomDelay();
+        console.log(`💤 Waiting ${(delay / 1000).toFixed(1)}s before next friend...`);
+        await wait(delay);
+      }
     }
     return output;
   }
