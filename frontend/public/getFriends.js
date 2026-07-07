@@ -86,6 +86,40 @@
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  async function fetchMutualIds(friendId, token) {
+    // Discord blocked /users/{id}/relationships for other users — use profile instead
+    const profileParams = new URLSearchParams({
+      type: 'modal',
+      with_mutual_guilds: 'false',
+      with_mutual_friends: 'true',
+      with_mutual_friends_count: 'false',
+    });
+
+    try {
+      const profile = await apiFetch(
+        `https://discord.com/api/v9/users/${friendId}/profile?${profileParams}`,
+        token,
+      );
+      const mutualFriends = profile.mutual_friends || profile.mutualFriends || [];
+      const ids = mutualFriends
+        .map((m) => (typeof m === 'string' ? m : m?.id))
+        .filter(Boolean);
+      if (ids.length > 0) return ids;
+    } catch (err) {
+      console.warn(`profile fetch failed for ${friendId}:`, err.message);
+    }
+
+    // fwendator fallback (may return empty on newer Discord)
+    try {
+      const rels = await apiFetch(`https://discord.com/api/v9/users/${friendId}/relationships`, token);
+      return Object.values(rels)
+        .map((r) => r?.user?.id || r?.id)
+        .filter(Boolean);
+    } catch {}
+
+    return [];
+  }
+
   async function buildFriendData(friends, token) {
     const output = {};
     const mins = Math.floor((friends.length % 3600) / 60);
@@ -105,15 +139,13 @@
         ? `${user.username}#${user.discriminator}`
         : user.global_name || user.username;
 
-      const mutuals = await apiFetch(`https://discord.com/api/v9/users/${user.id}/relationships`, token);
+      const mutual = await fetchMutualIds(user.id, token);
       output[user.id] = {
         name: tag,
         avatar: avatarUrl,
-        mutual: Object.values(mutuals)
-          .filter((r) => r && r.type === 1)
-          .map((r) => r.id),
+        mutual,
       };
-      console.log(`📃 Parsing friends... [${i + 1}/${friends.length}]`);
+      console.log(`📃 Parsing friends... [${i + 1}/${friends.length}] (${mutual.length} mutual)`);
       await wait(400);
     }
     return output;
