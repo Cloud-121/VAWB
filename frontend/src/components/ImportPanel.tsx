@@ -50,7 +50,7 @@ export default function ImportPanel({ onImported }: Props) {
           <span className="step-num">1</span>
           <div>
             <h3>Export friends on Discord</h3>
-            <p>Open <a href="https://discord.com/app" target="_blank" rel="noreferrer">discord.com/app</a>, press <kbd>F12</kbd>, go to Console, and paste the exporter script.</p>
+            <p>Open <a href="https://discord.com/app" target="_blank" rel="noreferrer">discord.com/app</a> while logged in, press <kbd>F12</kbd>, go to Console, and paste the exporter script. No token needed — it uses your active session.</p>
             <a className="script-link" href={scriptUrl} target="_blank" rel="noreferrer">
               View getFriends.js script
             </a>
