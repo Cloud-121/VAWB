@@ -1,0 +1,129 @@
+.person-detail {
+  width: 300px;
+  flex-shrink: 0;
+  background: white;
+  border-left: 1px solid var(--line);
+  padding: 1.5rem;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: -4px 0 16px var(--shadow);
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: var(--parchment);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--brown-mid);
+}
+
+.close-btn:hover {
+  background: var(--line);
+}
+
+.detail-avatar-wrap {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.detail-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  object-fit: cover;
+}
+
+.person-detail h2 {
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--brown-dark);
+}
+
+.detail-username {
+  text-align: center;
+  color: var(--brown-light);
+  margin-bottom: 0.75rem;
+}
+
+.detail-bio {
+  text-align: center;
+  font-style: italic;
+  color: var(--brown-mid);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.detail-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-transform: capitalize;
+  font-size: 0.9rem;
+  color: var(--brown-mid);
+  margin-bottom: 1.25rem;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-online { background: #43b581; }
+.status-idle { background: #faa61a; }
+.status-dnd { background: #f04747; }
+.status-offline { background: #747f8d; }
+
+.detail-relations h3 {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--brown-mid);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.35rem;
+}
+
+.detail-relations ul {
+  list-style: none;
+}
+
+.detail-relations li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--parchment);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rel-type {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--green-accent);
+  font-weight: 600;
+}
+
+.rel-name {
+  font-weight: 600;
+  color: var(--brown-dark);
+}
+
+.rel-label {
+  font-size: 0.8rem;
+  color: var(--brown-light);
+}
+
+@media (max-width: 900px) {
+  .person-detail {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+}
