@@ -1,6 +1,45 @@
 // Discord friend exporter — based on https://github.com/Escartem/fwendator
-// Run this in the browser console while on https://discord.com/app
+// Run this in the browser console while on https://discord.com/app (while logged in)
 // WARNING: Uses your Discord user token (self-botting). Token stays local; never sent to third parties.
+
+function getDiscordToken() {
+  let token;
+
+  try {
+    window.webpackChunkdiscord_app.push([[Symbol()], {}, (req) => {
+      for (const m of Object.values(req.c)) {
+        try {
+          if (!m.exports || m.exports === window) continue;
+          if (typeof m.exports.getToken === 'function') {
+            token = m.exports.getToken();
+            break;
+          }
+          if (typeof m.exports.default?.getToken === 'function') {
+            token = m.exports.default.getToken();
+            break;
+          }
+          for (const key in m.exports) {
+            const exp = m.exports[key];
+            if (typeof exp?.getToken === 'function' && exp[Symbol.toStringTag] !== 'IntlMessagesProxy') {
+              token = exp.getToken();
+              break;
+            }
+          }
+        } catch {}
+      }
+    }]);
+    window.webpackChunkdiscord_app.pop();
+  } catch {}
+
+  if (token) return token;
+
+  try {
+    const stored = localStorage.getItem('token');
+    if (stored) return stored.replace(/^"|"$/g, '');
+  } catch {}
+
+  return null;
+}
 
 async function f(e, n) {
   return await fetch(e, { headers: { Authorization: n } })
@@ -69,15 +108,23 @@ function up(e) {
 }
 
 async function m() {
-  if ("discord.com" == window.location.host) {
-    const e = prompt("Enter your token");
-    if (!e) return;
-    const n = await gl(await lf(e), e);
-    up(n);
-    console.log("✨ Done");
-  } else {
-    alert("Open discord.com/app first, then paste this script in the console.");
+  if (window.location.host !== 'discord.com') {
+    alert('Open discord.com/app first, then paste this script in the console.');
+    return;
   }
+
+  let token = getDiscordToken();
+  if (!token) {
+    token = prompt('Could not read your session automatically. Enter your token:');
+    if (!token) return;
+  } else {
+    console.log('🔑 Using your current Discord session');
+  }
+
+  const friends = await lf(token);
+  const data = await gl(friends, token);
+  up(data);
+  console.log('✨ Done');
 }
 
 m();
